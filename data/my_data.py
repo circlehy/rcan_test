@@ -44,10 +44,10 @@ class my_data(srdata.SRData):
 
     def _set_filesystem(self, dir_data):
         self.apath = dir_data 
-        #self.dir_hr = os.path.join(self.apath, 'my_data/my_data_train_HR')
-        #self.dir_lr = os.path.join(self.apath, 'my_data/my_data_train_LR_bicubic')
-        self.dir_hr = '/home/hy/workspace/data/my_data/my_data_train_HR'
-        self.dir_lr = '/home/hy/workspace/data/my_data/my_data_train_LR_bicubic'
+        self.dir_hr = os.path.join(self.apath, 'my_data/my_data_train_HR')
+        self.dir_lr = os.path.join(self.apath, 'my_data/my_data_train_LR_bicubic')
+        #self.dir_hr = '/home/hy/workspace/data/my_data/my_data_train_HR'
+        #self.dir_lr = '/home/hy/workspace/data/my_data/my_data_train_LR_bicubic'
         self.ext = '.png'
 
     def _name_hrbin(self):
