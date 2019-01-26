@@ -11,7 +11,7 @@ parser.add_argument('--template', default='.',
 # Hardware specifications
 parser.add_argument('--n_threads', type=int, default=3,
                     help='number of threads for data loading')
-parser.add_argument('--cpu', action='store_true',
+parser.add_argument('--cpu', action='store_true', default=True, 
                     help='use cpu only')
 parser.add_argument('--n_GPUs', type=int, default=1,
                     help='number of GPUs')
@@ -33,13 +33,13 @@ parser.add_argument('--data_test', type=str, default='my_data',
                     help='test dataset name')
 parser.add_argument('--benchmark_noise', action='store_true',
                     help='use noisy benchmark sets')
-parser.add_argument('--n_train', type=int, default=100,
+parser.add_argument('--n_train', type=int, default=25,
                     help='number of training set')
-parser.add_argument('--n_val', type=int, default=20,
+parser.add_argument('--n_val', type=int, default=25,
                     help='number of validation set')
-parser.add_argument('--offset_val', type=int, default=20,
+parser.add_argument('--offset_val', type=int, default=25,
                     help='validation index offest')
-parser.add_argument('--ext', type=str, default='sep',
+parser.add_argument('--ext', type=str, default='sep_reset',
                     help='dataset file extension')
 parser.add_argument('--scale', default='4',
                     help='super resolution scale')
@@ -83,7 +83,7 @@ parser.add_argument('--test_every', type=int, default=1000,
                     help='do test per every N batches')
 parser.add_argument('--epochs', type=int, default=1000,
                     help='number of epochs to train')
-parser.add_argument('--batch_size', type=int, default=12,
+parser.add_argument('--batch_size', type=int, default=1,
                     help='input batch size for training')
 parser.add_argument('--split_batch', type=int, default=1,
                     help='split the batch into smaller chunks')
@@ -118,7 +118,7 @@ parser.add_argument('--weight_decay', type=float, default=0,
                     help='weight decay')
 
 # Loss specifications
-parser.add_argument('--loss', type=str, default='1*L1',
+parser.add_argument('--loss', type=str, default='0.6*L1+0.2*VGG22+0.2*GAN',
                     help='loss function configuration')
 parser.add_argument('--skip_threshold', type=float, default='1e6',
                     help='skipping batch that has large error')

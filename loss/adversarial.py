@@ -52,7 +52,7 @@ class Adversarial(nn.Module):
                     gradient_norm = gradients.norm(2, dim=1)
                     gradient_penalty = 10 * gradient_norm.sub(1).pow(2).mean()
                     loss_d += gradient_penalty
-
+            print('loss',self.loss)
             # Discriminator update
             self.loss += loss_d.item()
             loss_d.backward()
