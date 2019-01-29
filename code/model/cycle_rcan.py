@@ -1,14 +1,14 @@
 from model import common
-
+import torch
 import torch.nn as nn
 
 def make_model(args, parent=False):
     return RCAN(args)
 
 ## Channel Attention (CA) Layer
-class cycle_rcan(nn.Module):
+class CALayer(nn.Module):
     def __init__(self, channel, reduction=16):
-        super(cycle_rcan, self).__init__()
+        super(CALayer, self).__init__()
         # global average pooling: feature --> point
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         # feature channel downscale and upscale --> channel weight
@@ -21,7 +21,11 @@ class cycle_rcan(nn.Module):
 
     def forward(self, x):
         y = self.avg_pool(x)
+        #print("calayer after avg_pool:", y.shape)
         y = self.conv_du(y)
+        #print("calayer after conv_du:", y.shape)
+        z = x*y
+        #print("calayer final output shape:", z.shape)
         return x * y
 
 ## Residual Channel Attention Block (RCAB)
@@ -81,6 +85,14 @@ class RCAN(nn.Module):
         rgb_std = (1.0, 1.0, 1.0)
         self.sub_mean = common.MeanShift(args.rgb_range, rgb_mean, rgb_std)
         
+        #modules_forehead = [nn.AdaptiveAvgPool2d(1), conv(args.n_colors*2, args.n_colors, kernel_size)]
+        modules_forehead = [nn.AdaptiveAvgPool2d(1)]
+        self.conv_du1 = nn.Sequential(
+                nn.Conv2d(6, 1, 1, padding=0, bias=True),
+                nn.ReLU(inplace=True),
+                nn.Conv2d(1, 3, 1, padding=0, bias=True),
+                nn.Sigmoid()
+        )
         # define head module
         modules_head = [conv(args.n_colors, n_feats, kernel_size)]
 
@@ -94,17 +106,31 @@ class RCAN(nn.Module):
 
         # define tail module
         modules_tail = [
-            common.Upsampler(conv, scale, n_feats, act=False),
+            common.Downsampler(conv, scale, n_feats, act=False),
             conv(n_feats, args.n_colors, kernel_size)]
 
         self.add_mean = common.MeanShift(args.rgb_range, rgb_mean, rgb_std, 1)
-
+        
+        self.forehead = nn.Sequential(*modules_forehead)
         self.head = nn.Sequential(*modules_head)
         self.body = nn.Sequential(*modules_body)
         self.tail = nn.Sequential(*modules_tail)
 
-    def forward(self, x):
+    def forward(self, x, y):
+        #print("x shape, y shape", x.shape, y.shape)
         x = self.sub_mean(x)
+        #print("x shape, y shape", x.shape, y.shape)
+        #print("x shape, y shape", x.is_cuda, y.is_cuda)
+        x_attention = torch.cat([x, y], 1)
+        print("11 x_attention shape, x shape", x_attention.shape, x.shape)
+        #print(x_attention)
+        x_attention = self.forehead(x_attention)
+        print("22 x_attention shape, x shape", x_attention.shape, x.shape)
+        #print(x_attention)
+        x_attention = self.conv_du1(x_attention)
+        print("33 x_attention shape, x shape", x_attention.shape, x.shape)
+        x = x*x_attention
+        print("44 x_attention shape, x shape", x_attention.shape, x.shape)
         x = self.head(x)
 
         res = self.body(x)

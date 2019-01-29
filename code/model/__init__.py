@@ -35,7 +35,7 @@ class Model(nn.Module):
         )
         if args.print_model: print(self.model)
 
-    def forward(self, x, idx_scale):
+    def forward(self, x, y, idx_scale):
         self.idx_scale = idx_scale
         target = self.get_model()
         if hasattr(target, 'set_scale'):
@@ -49,9 +49,9 @@ class Model(nn.Module):
 
             return self.forward_x8(x, forward_function)
         elif self.chop and not self.training:
-            return self.forward_chop(x)
+            return self.forward_chop(x, y)
         else:
-            return self.model(x)
+            return self.model(x, y)
 
     def get_model(self):
         if self.n_GPUs == 1:
@@ -111,7 +111,7 @@ class Model(nn.Module):
                 strict=False
             )
 
-    def forward_chop(self, x, shave=10, min_size=160000):
+    def forward_chop(self, x, y, shave=10, min_size=160000):
         scale = self.scale[self.idx_scale]
         n_GPUs = min(self.n_GPUs, 4)
         b, c, h, w = x.size()
@@ -122,17 +122,26 @@ class Model(nn.Module):
             x[:, :, 0:h_size, (w - w_size):w],
             x[:, :, (h - h_size):h, 0:w_size],
             x[:, :, (h - h_size):h, (w - w_size):w]]
-
+        b1, c1, h1, w1 = y.size()
+        h_half1, w_half1 = h1 // 2, w1 // 2
+        h_size1, w_size1 = h_half1 + shave, w_half1+ shave
+        lr_map_list = [
+            y[:, :, 0:h_size1, 0:w_size1],
+            y[:, :, 0:h_size1, (w1 - w_size1):w1],
+            y[:, :, (h1 - h_size1):h1, 0:w_size1],
+            y[:, :, (h1 - h_size1):h1, (w1 - w_size1):w1]]
+        zipped_ = zip(lr_list, lr_map_list)
         if w_size * h_size < min_size:
             sr_list = []
             for i in range(0, 4, n_GPUs):
                 lr_batch = torch.cat(lr_list[i:(i + n_GPUs)], dim=0)
-                sr_batch = self.model(lr_batch)
+                lr_map_batch = torch.cat(lr_map_list[i:(i+n_GPUs)], dim=0)
+                sr_batch = self.model(lr_batch, lr_map_batch)
                 sr_list.extend(sr_batch.chunk(n_GPUs, dim=0))
         else:
             sr_list = [
-                self.forward_chop(patch, shave=shave, min_size=min_size) \
-                for patch in lr_list
+                self.forward_chop(patch, map_patch, shave=shave, min_size=min_size) \
+                for patch, map_patch in zipped_
             ]
 
         h, w = scale * h, scale * w

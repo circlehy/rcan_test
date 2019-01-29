@@ -43,6 +43,7 @@ class Loss(nn.modules.loss._Loss):
                 'weight': float(weight),
                 'function': loss_function}
             )
+            print("self.loss ",self.loss)
             if loss_type.find('GAN') >= 0:
                 self.loss.append({'type': 'DIS', 'weight': 1, 'function': None})
 
@@ -70,6 +71,7 @@ class Loss(nn.modules.loss._Loss):
         losses = []
         for i, l in enumerate(self.loss):
             if l['function'] is not None:
+                print("AAAAAAAAAAA", sr.shape, hr.shape)
                 loss = l['function'](sr, hr)
                 effective_loss = l['weight'] * loss
                 losses.append(effective_loss)

@@ -74,3 +74,23 @@ class Upsampler(nn.Sequential):
             raise NotImplementedError
 
         super(Upsampler, self).__init__(*m)
+
+class Downsampler(nn.Sequential):
+    def __init__(self, conv, scale, n_feat, bn=False, act=False, bias=True):
+
+        m = []
+        if (scale & (scale - 1)) == 0:    # Is scale = 2^n?
+            for _ in range(int(math.log(scale, 2))):
+                m.append(conv(n_feat, 4 * n_feat, 3, bias))
+                m.append(nn.PixelShuffle(0.5))
+                if bn: m.append(nn.BatchNorm2d(n_feat))
+                if act: m.append(act())
+        elif scale == 3:
+            m.append(conv(n_feat, 9 * n_feat, 3, bias))
+            m.append(nn.PixelShuffle(1/3))
+            if bn: m.append(nn.BatchNorm2d(n_feat))
+            if act: m.append(act())
+        else:
+            raise NotImplementedError
+
+        super(Upsampler, self).__init__(*m)

@@ -27,17 +27,17 @@ parser.add_argument('--dir_demo', type=str, default='../test',
 #                    help='train dataset name')
 #parser.add_argument('--data_test', type=str, default='DIV2K',
 #                    help='test dataset name')
-parser.add_argument('--data_train', type=str, default='my_data',
+parser.add_argument('--data_train', type=str, default='my_data_with_seg_map',
                     help='train dataset name')
-parser.add_argument('--data_test', type=str, default='my_data',
+parser.add_argument('--data_test', type=str, default='my_data_with_seg_map',
                     help='test dataset name')
 parser.add_argument('--benchmark_noise', action='store_true',
                     help='use noisy benchmark sets')
-parser.add_argument('--n_train', type=int, default=50,
+parser.add_argument('--n_train', type=int, default=5,
                     help='number of training set')
-parser.add_argument('--n_val', type=int, default=50,
+parser.add_argument('--n_val', type=int, default=5,
                     help='number of validation set')
-parser.add_argument('--offset_val', type=int, default=50,
+parser.add_argument('--offset_val', type=int, default=5,
                     help='validation index offest')
 parser.add_argument('--ext', type=str, default='sep_reset',
                     help='dataset file extension')
@@ -79,9 +79,9 @@ parser.add_argument('--precision', type=str, default='single',
 # Training specifications
 parser.add_argument('--reset', action='store_true',
                     help='reset the training')
-parser.add_argument('--test_every', type=int, default=1000,
+parser.add_argument('--test_every', type=int, default=5,
                     help='do test per every N batches')
-parser.add_argument('--epochs', type=int, default=1000,
+parser.add_argument('--epochs', type=int, default=1,
                     help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=1,
                     help='input batch size for training')
