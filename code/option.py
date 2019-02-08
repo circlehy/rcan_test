@@ -19,7 +19,7 @@ parser.add_argument('--seed', type=int, default=1,
                     help='random seed')
 
 # Data specifications
-parser.add_argument('--dir_data', type=str, default='/home/hy/workspace/rcan_test',
+parser.add_argument('--dir_data', type=str, default='/raid/huangyuan/rcan_test',
                     help='dataset directory')
 parser.add_argument('--dir_demo', type=str, default='../test',
                     help='demo image directory')
@@ -33,13 +33,13 @@ parser.add_argument('--data_test', type=str, default='my_data_with_seg_map',
                     help='test dataset name')
 parser.add_argument('--benchmark_noise', action='store_true',
                     help='use noisy benchmark sets')
-parser.add_argument('--n_train', type=int, default=5,
+parser.add_argument('--n_train', type=int, default=4,
                     help='number of training set')
-parser.add_argument('--n_val', type=int, default=5,
+parser.add_argument('--n_val', type=int, default=1, 
                     help='number of validation set')
-parser.add_argument('--offset_val', type=int, default=5,
+parser.add_argument('--offset_val', type=int, default=4,
                     help='validation index offest')
-parser.add_argument('--ext', type=str, default='sep_reset',
+parser.add_argument('--ext', type=str, default='sep',
                     help='dataset file extension')
 parser.add_argument('--scale', default='4',
                     help='super resolution scale')
@@ -79,9 +79,9 @@ parser.add_argument('--precision', type=str, default='single',
 # Training specifications
 parser.add_argument('--reset', action='store_true',
                     help='reset the training')
-parser.add_argument('--test_every', type=int, default=5,
+parser.add_argument('--test_every', type=int, default=10,
                     help='do test per every N batches')
-parser.add_argument('--epochs', type=int, default=1,
+parser.add_argument('--epochs', type=int, default=100,
                     help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=1,
                     help='input batch size for training')
@@ -95,7 +95,7 @@ parser.add_argument('--gan_k', type=int, default=1,
                     help='k value for adversarial loss')
 
 # Optimization specifications
-parser.add_argument('--lr', type=float, default=1e-6,
+parser.add_argument('--lr', type=float, default=1e-5,
                     help='learning rate')
 parser.add_argument('--lr_decay', type=int, default=200,
                     help='learning rate decay per N epochs')

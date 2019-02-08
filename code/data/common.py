@@ -8,7 +8,7 @@ import skimage.transform as st
 import torch
 from torchvision import transforms
 
-def get_patch(img_in, img_tar, img_in_map, patch_size, scale, multi_scale=False):
+def get_patch(img_in, img_tar, img_in_map, img_tar_map, patch_size, scale, multi_scale=False):
     ih, iw = img_in.shape[:2]
 
     p = scale if multi_scale else 1
@@ -23,8 +23,9 @@ def get_patch(img_in, img_tar, img_in_map, patch_size, scale, multi_scale=False)
     img_in = img_in[iy:iy + ip, ix:ix + ip, :]
     img_in_map = img_in_map[iy:iy + ip, ix:ix + ip, :]
     img_tar = img_tar[ty:ty + tp, tx:tx + tp, :]
+    img_tar_map = img_tar_map[ty:ty + tp, tx:tx + tp, :]
 
-    return img_in, img_tar, img_in_map
+    return img_in, img_tar, img_in_map, img_tar_map
 
 def set_channel(l, n_channel):
     def _set_channel(img):

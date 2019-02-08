@@ -21,6 +21,7 @@ class SRData(data.Dataset):
 
         def _load_bin():
             self.images_hr = np.load(self._name_hrbin())
+            self.images_hr_map = np.load(self._name_hr_mapbin())
             self.images_lr = [
                 np.load(self._name_lrbin(s)) for s in self.scale
             ]
@@ -29,9 +30,9 @@ class SRData(data.Dataset):
             ]
 
         if args.ext == 'img' or benchmark:
-            self.images_hr, self.images_lr, self.images_map = self._scan()
+            self.images_hr, self.images_lr, self.images_map, self.images_hr_map = self._scan()
         elif args.ext.find('sep') >= 0:
-            self.images_hr, self.images_lr, self.images_map = self._scan()
+            self.images_hr, self.images_lr, self.images_map, self.images_hr_map = self._scan()
             if args.ext.find('reset') >= 0:
                 print('Preparing seperated binary files')
                 print (len(self.images_hr))
@@ -40,6 +41,11 @@ class SRData(data.Dataset):
                     hr = misc.imread(v)
                     name_sep = v.replace(self.ext, '.npy')
                     np.save(name_sep, hr)
+                for v in self.images_hr_map:
+                    #print v                          #
+                    hr_map = misc.imread(v)
+                    name_sep = v.replace(self.ext, '.npy')
+                    np.save(name_sep, hr_map)
                 for si, s in enumerate(self.scale):
                     #print len(self.images_lr[si])    #
                     for v in self.images_lr[si]:
@@ -57,6 +63,9 @@ class SRData(data.Dataset):
 
             self.images_hr = [
                 v.replace(self.ext, '.npy') for v in self.images_hr
+            ]
+            self.images_hr_map = [
+                v.replace(self.ext, '.npy') for v in self.images_hr_map
             ]
             self.images_lr = [
                 [v.replace(self.ext, '.npy') for v in self.images_lr[i]]
@@ -79,10 +88,12 @@ class SRData(data.Dataset):
                 if not os.path.isdir(bin_path):
                     os.mkdir(bin_path)
 
-                list_hr, list_lr, list_map = self._scan()
+                list_hr, list_lr, list_map, list_hr_map = self._scan()
                 hr = [misc.imread(f) for f in list_hr]
+                hr_map = [misc.imread(f) for f in list_hr_map]
                 np.save(self._name_hrbin(), hr)
-                del hr
+                np.save(self._name_hr_mapbin(), hr_map)
+                del hr, hr_map
                 for si, s in enumerate(self.scale):
                     lr_scale = [misc.imread(f) for f in list_lr[si]]
                     np.save(self._name_lrbin(s), lr_scale)
@@ -113,11 +124,11 @@ class SRData(data.Dataset):
 
 
     def __getitem__(self, idx):
-        lr, hr, lr_map, filename = self._load_file(idx)
-        lr, hr, lr_map = self._get_patch(lr, hr, lr_map)
-        lr, hr, lr_map = common.set_channel([lr, hr, lr_map], self.args.n_colors)
-        lr_tensor, hr_tensor, lr_map_tensor = common.np2Tensor([lr, hr, lr_map], self.args.rgb_range)
-        return lr_tensor, hr_tensor, lr_map_tensor, filename
+        lr, hr, lr_map, hr_map, filename = self._load_file(idx)
+        lr, hr, lr_map, hr_map = self._get_patch(lr, hr, lr_map, hr_map)
+        lr, hr, lr_map, hr_map = common.set_channel([lr, hr, lr_map, hr_map], self.args.n_colors)
+        lr_tensor, hr_tensor, lr_map_tensor, hr_map_tensor = common.np2Tensor([lr, hr, lr_map, hr_map], self.args.rgb_range)
+        return lr_tensor, hr_tensor, lr_map_tensor, hr_map_tensor, filename
 
     def __len__(self):
         return len(self.images_hr)
@@ -130,38 +141,42 @@ class SRData(data.Dataset):
         lr = self.images_lr[self.idx_scale][idx]
         lr_map = self.images_map[self.idx_scale][idx]
         hr = self.images_hr[idx]
+        hr_map = self.images_hr_map[idx]
         if self.args.ext == 'img' or self.benchmark:
             filename = hr
             lr = misc.imread(lr)
             hr = misc.imread(hr)
             lr_map = misc.imread(lr_map)
+            hr_map = misc.imread(hr_map)
         elif self.args.ext.find('sep') >= 0:
             filename = hr
             lr = np.load(lr)
             hr = np.load(hr)
             lr_map = np.load(lr_map)
+            hr_map = np.load(hr_map)
         else:
             filename = str(idx + 1)
 
         filename = os.path.splitext(os.path.split(filename)[-1])[0]
 
-        return lr, hr, lr_map, filename
+        return lr, hr, lr_map, hr_map, filename
 
-    def _get_patch(self, lr, hr, lr_map):
+    def _get_patch(self, lr, hr, lr_map, hr_map):
         patch_size = self.args.patch_size
         scale = self.scale[self.idx_scale]
         multi_scale = len(self.scale) > 1
         if self.train:
-            lr, hr, lr_map = common.get_patch(
-                lr, hr, lr_map, patch_size, scale, multi_scale=multi_scale
+            lr, hr, lr_map, hr_map = common.get_patch(
+                lr, hr, lr_map, hr_map, patch_size, scale, multi_scale=multi_scale
             )
-            lr, hr, lr_map = common.augment([lr, hr, lr_map])
+            lr, hr, lr_map, hr_map = common.augment([lr, hr, lr_map, hr_map])
             lr = common.add_noise(lr, self.args.noise)
         else:
             ih, iw = lr.shape[0:2]
             hr = hr[0:ih * scale, 0:iw * scale]
+            hr_map = hr_map[0:ih * scale, 0:iw * scale]
 
-        return lr, hr, lr_map
+        return lr, hr, lr_map, hr_map
 
     def set_scale(self, idx_scale):
         self.idx_scale = idx_scale

@@ -29,7 +29,7 @@ else:
 
 def _ms_loop(dataset, index_queue, data_queue, collate_fn, scale, seed, init_fn, worker_id):
     print('len of dataset',len(dataset))
-    print('dataset[0]',dataset[0])
+    #print('dataset[0]',dataset[0])
     global _use_shared_memory
     _use_shared_memory = True
     _set_worker_signal_handlers()
@@ -48,11 +48,11 @@ def _ms_loop(dataset, index_queue, data_queue, collate_fn, scale, seed, init_fn,
                 dataset.set_scale(idx_scale)
                 
             samples = collate_fn([dataset[i] for i in batch_indices])
-            print(type(samples))
-            print(len(samples))
-            print(samples[0].shape)
-            print(samples[1].shape)
-            print(samples[2])
+            #print(type(samples))
+            #print(len(samples))
+            #print(samples[0].shape)
+            #print(samples[1].shape)
+            #print(samples[2])
      
 
             samples.append(idx_scale)

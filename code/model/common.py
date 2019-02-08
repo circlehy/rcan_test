@@ -93,4 +93,4 @@ class Downsampler(nn.Sequential):
         else:
             raise NotImplementedError
 
-        super(Upsampler, self).__init__(*m)
+        super(Downsampler, self).__init__(*m)

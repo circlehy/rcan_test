@@ -42,27 +42,28 @@ class Trainer():
         self.model.train()
 
         timer_data, timer_model = utility.timer(), utility.timer()
-        print('len of loader', len(self.loader_train))
-        print(type(self.loader_train))
-        print(dir(self.loader_train))
+        #print('len of loader', len(self.loader_train))
+        #print(type(self.loader_train))
+        #print(dir(self.loader_train))
         for batch, item in enumerate(self.loader_train):
-            print(len(item))
-            [lr,hr, lr_map,idx_scale,string] = item
-            print("lr size:",lr.shape)
-            print("hr size:",hr.shape)
-            print("lr_map size:",lr_map.shape)
+            #print(len(item))
+            [lr,hr, lr_map,hr_map, idx_scale,string] = item
+            #print("lr size:",lr.shape)
+            #print("hr size:",hr.shape)
+            #print("lr_map size:",lr_map.shape)
             # print(map_.shape)
-            print("idx_scale",idx_scale)
-            print(string)
+            #print("idx_scale",idx_scale)
+            #print(string)
             #lr = torch.cat([lr, lr_map], 1)
             #hr = torch.cat([hr, hr], 1)
-            print("lr concat lr_map",lr.shape)
-            lr, hr, lr_map = self.prepare([lr, hr, lr_map])
+            #print("lr concat lr_map",lr.shape)
+            lr, hr, lr_map, hr_map = self.prepare([lr, hr, lr_map, hr_map])
             timer_data.hold()
             timer_model.tic()
-
+            hr =torch.cat([hr, hr_map], 1)
             self.optimizer.zero_grad()
             sr = self.model(lr, lr_map, idx_scale)
+            print("sr, hr", sr.shape, hr.shape)
             loss = self.loss(sr, hr)
             if loss.item() < self.args.skip_threshold * self.error_last:
                 loss.backward()
@@ -99,13 +100,13 @@ class Trainer():
                 eval_acc = 0
                 self.loader_test.dataset.set_scale(idx_scale)
                 tqdm_test = tqdm(self.loader_test, ncols=80)
-                for idx_img, (lr, hr, lr_map, filename, _) in enumerate(tqdm_test):
+                for idx_img, (lr, hr, lr_map, hr_map, filename, _) in enumerate(tqdm_test):
                     filename = filename[0]
                     no_eval = (hr.nelement() == 1)
                     if not no_eval:
-                        lr, hr, lr_map = self.prepare([lr, hr, lr_map])
+                        lr, hr, lr_map, hr_map = self.prepare([lr, hr, lr_map, hr_map])
                     else:
-                        lr = self.prepare([lr])[0]
+                        lr = self.prepare([lr, lr_map])[0]
 
                     sr = self.model(lr, lr_map, idx_scale)
                     sr = utility.quantize(sr, self.args.rgb_range)
@@ -113,7 +114,7 @@ class Trainer():
                     save_list = [sr]
                     if not no_eval:
                         eval_acc += utility.calc_psnr(
-                            sr, hr, scale, self.args.rgb_range,
+                            sr, hr,hr_map, scale, self.args.rgb_range,
                             benchmark=self.loader_test.dataset.benchmark
                         )
                         save_list.extend([lr, hr])
@@ -121,6 +122,7 @@ class Trainer():
                     if self.args.save_results:
                         self.ckp.save_results(filename, save_list, scale)
 
+                print("len loader_test",len(self.loader_test), self.loader_test)
                 self.ckp.log[-1, idx_scale] = eval_acc / len(self.loader_test)
                 best = self.ckp.log.max(0)
                 self.ckp.write_log(

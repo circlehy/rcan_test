@@ -6,21 +6,15 @@ class Discriminator(nn.Module):
     def __init__(self, args, gan_type='GAN'):
         super(Discriminator, self).__init__()
 
-        in_channels = 6
+        in_channels = 3
         out_channels = 64
         depth = 7
         #bn = not gan_type == 'WGAN_GP'
         bn = True
         act = nn.LeakyReLU(negative_slope=0.2, inplace=True)
 
-        self.conv_du1 = nn.Sequential(
-                nn.Conv2d(6, 1, 1, padding=0, bias=True),
-                nn.ReLU(inplace=True),
-                nn.Conv2d(1, 3, 1, padding=0, bias=True),
-                nn.Sigmoid()
-        )
         m_features = [
-            common.BasicBlock(in_channels, out_channels, 3, bn=bn, act=act)
+            common.BasicBlock(args.n_colors, out_channels, 3, bn=bn, act=act)
         ]
         for i in range(depth):
             in_channels = out_channels
@@ -44,8 +38,6 @@ class Discriminator(nn.Module):
         self.classifier = nn.Sequential(*m_classifier)
 
     def forward(self, x):
-        #x = torch.cat([x, y], 1)
-        #x = conv_du1(x)  # back to 3 channel
         features = self.features(x)
         output = self.classifier(features.view(features.size(0), -1))
 

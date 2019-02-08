@@ -14,11 +14,15 @@ class my_data_with_seg_map(srdata.SRData):
     def __init__(self, args, train=True):
         super(my_data_with_seg_map, self).__init__(args, train)
         self.repeat = args.test_every // (args.n_train // args.batch_size)
+        print("AAAA",self.__hash__, self.train)
 
     def _scan(self):
+        #self.train = True #gan ga yi hui
         list_hr = []
+        list_hr_map = []
         list_map = [[] for _ in self.scale]
         list_lr = [[] for _ in self.scale]
+        print("BBBB",self.__hash__, self.train)
         if self.train:
             idx_begin = 0
             idx_end = self.args.n_train
@@ -26,58 +30,66 @@ class my_data_with_seg_map(srdata.SRData):
             idx_begin = self.args.n_train
             idx_end = self.args.offset_val + self.args.n_val
 
-        all_file = os.walk(self.dir_hr)
-
-        for path_all_file,d,filelist in all_file:
+        all_file = os.listdir(self.dir_hr)
+        print(len(all_file))
+        print(all_file)
+        print("idx_begin, idx_end :",idx_begin,idx_end)
+        print(self.train)
+        for indx in range(idx_begin,idx_end):
             #filename = '{:0>10}'.format(i)
-            for index_name in filelist:
-                if index_name.endswith('png'):
-                   filename = index_name[0:-4]
-                   list_hr.append(os.path.join(self.dir_hr, filename + self.ext))
-                   for si, s in enumerate(self.scale):
-                       list_map[si].append(os.path.join(
-                       self.dir_map,
-                       'X{}/{}x{}{}'.format(s, filename, s, self.ext)
-                       ))
-                   for si, s in enumerate(self.scale):
-                       list_lr[si].append(os.path.join(
-                       self.dir_lr,
-                       'X{}/{}x{}{}'.format(s, filename, s, self.ext)
-                       ))
+            #for index_name in filelist:
+            print("indx :", indx)
+            index_name = all_file[indx]
+            if index_name.endswith('png'):
+                #print(index_name)
+                filename = index_name[0:-4]
 
-        print (len(list_lr))
-        return list_hr, list_lr, list_map
+                list_hr.append(os.path.join(self.dir_hr, filename + self.ext))
+                list_hr_map.append(os.path.join(self.dir_hr_map, filename + self.ext))
+                for si, s in enumerate(self.scale):
+                    print(si)
+                    list_map[si].append(os.path.join(
+                    self.dir_map,
+                    'X{}/{}x{}{}'.format(s, filename, s, self.ext)
+                    ))
+                for si, s in enumerate(self.scale):
+                    list_lr[si].append(os.path.join(
+                    self.dir_lr,
+                    'X{}/{}x{}{}'.format(s, filename, s, self.ext)
+                    ))
+        print ("len list_hr", len(list_hr))
+        print("len list_hr_map", len(list_hr_map))
+        print("len list_lr",len(list_lr[0]))
+        print("len list_map",len(list_map[0]))
+        #print (len(list_lr))
+        return list_hr, list_lr, list_map, list_hr_map
 
     def _set_filesystem(self, dir_data):
         self.apath = dir_data 
-        self.dir_hr = os.path.join(self.apath, 'my_data/my_data_train_HR')
-        self.dir_lr = os.path.join(self.apath, 'my_data/my_data_train_LR_bicubic')
-        self.dir_map = os.path.join(self.apath, 'my_data/my_data_train_LR_bicubic')
-        #self.dir_hr = '/home/hy/workspace/data/my_data/my_data_train_HR'
-        #self.dir_lr = '/home/hy/workspace/data/my_data/my_data_train_LR_bicubic'
+        #self.dir_hr = os.path.join(self.apath, '/my_data/my_data_train_HR')
+        #self.dir_lr = os.path.join(self.apath, '/my_data/my_data_train_LR_bicubic')
+        #self.dir_map = os.path.join(self.apath, '/my_data/my_data_train_LR_map_bicubic')
+        self.dir_hr = '/home/hy/workspace/rcan_test/my_data/my_data_train_HR'
+        self.dir_lr = '/home/hy/workspace/rcan_test/my_data/my_data_train_LR_bicubic'
+        self.dir_map = '/home/hy/workspace/rcan_test/my_data/my_data_train_LR_map_bicubic'
+        self.dir_hr_map = '/home/hy/workspace/rcan_test/my_data/my_data_train_HR_map'
         self.ext = '.png'
 
     def _name_hrbin(self):
-        
-        print('_name_hrbin:',os.path.join(
-            self.apath,
-            'bin',
-            '{}_bin_HR.npy'.format(self.split)
-        ))
         return os.path.join(
             self.apath,
             'bin',
             '{}_bin_HR.npy'.format(self.split)
         )
 
-    def _name_lrbin(self, scale):
-        print('_name_lrbin',os.path.join(
+    def _name_hr_mapbin(self):
+        return os.path.join(
             self.apath,
             'bin',
-            '{}_bin_LR_X{}.npy'.format(self.split, scale)
-        ))
-        
-        
+            '{}_bin_HR.npy'.format(self.split)
+        )
+
+    def _name_lrbin(self, scale):      
         return os.path.join(
             self.apath,
             'bin',
@@ -85,7 +97,6 @@ class my_data_with_seg_map(srdata.SRData):
         )
 
     def _name_mapbin(self, scale):
-        print(os.path.join(self.apath, 'bin', '{}_bin_LR_X{}.npy'.format(self.split, scale)))
         return os.path.join(self.apath, 'bin', '{}_bin_LR_X{}.npy'.format(self.split, scale))
 
 
