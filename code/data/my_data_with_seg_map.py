@@ -14,7 +14,7 @@ class my_data_with_seg_map(srdata.SRData):
     def __init__(self, args, train=True):
         super(my_data_with_seg_map, self).__init__(args, train)
         self.repeat = args.test_every // (args.n_train // args.batch_size)
-        print("AAAA",self.__hash__, self.train)
+        #print("AAAA",self.__hash__, self.train)
 
     def _scan(self):
         #self.train = True #gan ga yi hui
@@ -22,7 +22,7 @@ class my_data_with_seg_map(srdata.SRData):
         list_hr_map = []
         list_map = [[] for _ in self.scale]
         list_lr = [[] for _ in self.scale]
-        print("BBBB",self.__hash__, self.train)
+        #print("BBBB",self.__hash__, self.train)
         if self.train:
             idx_begin = 0
             idx_end = self.args.n_train
@@ -32,9 +32,9 @@ class my_data_with_seg_map(srdata.SRData):
 
         all_file = os.listdir(self.dir_hr)
         print(len(all_file))
-        print(all_file)
+        #print(all_file)
         print("idx_begin, idx_end :",idx_begin,idx_end)
-        print(self.train)
+        #print(self.train)
         for indx in range(idx_begin,idx_end):
             #filename = '{:0>10}'.format(i)
             #for index_name in filelist:
@@ -47,7 +47,7 @@ class my_data_with_seg_map(srdata.SRData):
                 list_hr.append(os.path.join(self.dir_hr, filename + self.ext))
                 list_hr_map.append(os.path.join(self.dir_hr_map, filename + self.ext))
                 for si, s in enumerate(self.scale):
-                    print(si)
+                    #print(si)
                     list_map[si].append(os.path.join(
                     self.dir_map,
                     'X{}/{}x{}{}'.format(s, filename, s, self.ext)

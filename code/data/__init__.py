@@ -38,8 +38,8 @@ class Data:
 
         else:
             module_test = import_module('data.' +  args.data_test.lower())
-            print("AAAAAAAAAAAAAAAAAAAAAAA")
-            print("module_test, args.data_test",module_test,args.data_test)
+            #print("AAAAAAAAAAAAAAAAAAAAAAA")
+            #print("module_test, args.data_test",module_test,args.data_test)
             testset = getattr(module_test, args.data_test)(args, train=False)
 
         self.loader_test = MSDataLoader(

@@ -33,11 +33,11 @@ parser.add_argument('--data_test', type=str, default='my_data_with_seg_map',
                     help='test dataset name')
 parser.add_argument('--benchmark_noise', action='store_true',
                     help='use noisy benchmark sets')
-parser.add_argument('--n_train', type=int, default=4,
+parser.add_argument('--n_train', type=int, default=2,
                     help='number of training set')
 parser.add_argument('--n_val', type=int, default=1, 
                     help='number of validation set')
-parser.add_argument('--offset_val', type=int, default=4,
+parser.add_argument('--offset_val', type=int, default=2,
                     help='validation index offest')
 parser.add_argument('--ext', type=str, default='sep',
                     help='dataset file extension')
@@ -47,7 +47,7 @@ parser.add_argument('--patch_size', type=int, default=192,
                     help='output patch size')
 parser.add_argument('--rgb_range', type=int, default=255,
                     help='maximum value of RGB')
-parser.add_argument('--n_colors', type=int, default=3,
+parser.add_argument('--n_colors', type=int, default=6,
                     help='number of color channels to use')
 parser.add_argument('--noise', type=str, default='.',
                     help='Gaussian noise std.')
@@ -81,7 +81,7 @@ parser.add_argument('--reset', action='store_true',
                     help='reset the training')
 parser.add_argument('--test_every', type=int, default=10,
                     help='do test per every N batches')
-parser.add_argument('--epochs', type=int, default=100,
+parser.add_argument('--epochs', type=int, default=10,
                     help='number of epochs to train')
 parser.add_argument('--batch_size', type=int, default=1,
                     help='input batch size for training')
@@ -95,7 +95,7 @@ parser.add_argument('--gan_k', type=int, default=1,
                     help='k value for adversarial loss')
 
 # Optimization specifications
-parser.add_argument('--lr', type=float, default=1e-5,
+parser.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
 parser.add_argument('--lr_decay', type=int, default=200,
                     help='learning rate decay per N epochs')

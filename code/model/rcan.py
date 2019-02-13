@@ -90,7 +90,7 @@ class RCAN(nn.Module):
         self.conv_du1 = nn.Sequential(
                 nn.Conv2d(6, 1, 1, padding=0, bias=True),
                 nn.ReLU(inplace=True),
-                nn.Conv2d(1, 3, 1, padding=0, bias=True),
+                nn.Conv2d(1, 6, 1, padding=0, bias=True),
                 nn.Sigmoid()
         )
         # define head module
@@ -107,7 +107,7 @@ class RCAN(nn.Module):
         # define tail module
         modules_tail = [
             common.Upsampler(conv, scale, n_feats, act=False),
-            conv(n_feats, args.n_colors*2, kernel_size)]
+            conv(n_feats, args.n_colors, kernel_size)]
 
         self.add_mean = common.MeanShift(args.rgb_range, rgb_mean, rgb_std, 1)
         
@@ -117,11 +117,15 @@ class RCAN(nn.Module):
         self.tail = nn.Sequential(*modules_tail)
 
     def forward(self, x, y):
+        #print("44 x_attention shape, x shape", x.shape)
+
         #print("x shape, y shape", x.shape, y.shape)
         x = self.sub_mean(x)
         #print("x shape, y shape", x.shape, y.shape)
         #print("x shape, y shape", x.is_cuda, y.is_cuda)
         x = torch.cat([x, y], 1)
+        #print("44 x_attention shape, x shape", x.shape)
+
         #print("11 x_attention shape, x shape", x_attention.shape, x.shape)
         #print(x_attention)
         #x_attention = self.forehead(x_attention)
@@ -130,13 +134,15 @@ class RCAN(nn.Module):
         x = self.conv_du1(x)
         #print("33 x_attention shape, x shape", x_attention.shape, x.shape)
         #x = x*x_attention
-        #print("44 x_attention shape, x shape", x_attention.shape, x.shape)
+        #print("44 x_attention shape, x shape", x.shape)
+        #print(self.head)
         x = self.head(x)
 
         res = self.body(x)
         res += x
 
         x1 = self.tail(res)
+        #print("x1 shape:", x1.shape)
         x2, x3 = torch.split(x1, 3, 1)
         x2 = self.add_mean(x2)
         x = torch.cat([x2,x3],1)

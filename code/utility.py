@@ -122,7 +122,9 @@ class checkpoint():
         filename = '{}/results/{}_x{}_'.format(self.dir, filename, scale)
         postfix = ('SR', 'LR', 'HR')
         for v, p in zip(save_list, postfix):
-            normalized = v[0].data.mul(255 / self.args.rgb_range)
+            v1 = v[0]
+            v1 = v1[0:3,:,:]
+            normalized = v1.data.mul(255 / self.args.rgb_range)
             ndarr = normalized.byte().permute(1, 2, 0).cpu().numpy()
             misc.imsave('{}{}.png'.format(filename, p), ndarr)
 

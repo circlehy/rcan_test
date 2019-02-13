@@ -23,6 +23,8 @@ class VGG(nn.Module):
 
     def forward(self, sr, hr):
         def _forward(x):
+            x1, x2 = torch.split(x, 3, 1)
+            x = x1
             x = self.sub_mean(x)
             x = self.vgg(x)
             return x

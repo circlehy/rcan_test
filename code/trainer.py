@@ -64,6 +64,12 @@ class Trainer():
             self.optimizer.zero_grad()
             sr = self.model(lr, lr_map, idx_scale)
             print("sr, hr", sr.shape, hr.shape)
+            #sr1, sr2 = torch.split(sr, 3, 1)
+            #hr1, hr2 = torch.split(hr, 3, 1)
+            #print("sr1, hr1 :",sr1.shape, hr1.shape)
+            #loss1 = self.loss(sr1, hr1)
+            #loss2 = self.loss(sr2, hr2)
+            #loss = loss1 + 0.1* loss2
             loss = self.loss(sr, hr)
             if loss.item() < self.args.skip_threshold * self.error_last:
                 loss.backward()
@@ -114,7 +120,7 @@ class Trainer():
                     save_list = [sr]
                     if not no_eval:
                         eval_acc += utility.calc_psnr(
-                            sr, hr,hr_map, scale, self.args.rgb_range,
+                            sr[:,0:3,:,:], hr[:,0:3,:,:], scale, self.args.rgb_range,
                             benchmark=self.loader_test.dataset.benchmark
                         )
                         save_list.extend([lr, hr])

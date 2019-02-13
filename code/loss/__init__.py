@@ -69,15 +69,18 @@ class Loss(nn.modules.loss._Loss):
 
     def forward(self, sr, hr):
         losses = []
-        print("loss",self.loss)
+        #print("loss",self.loss)
 
         for i, l in enumerate(self.loss):
             if l['function'] is not None:
-                print(l['function'])
-                #print("AAAAAAAAAAA", sr.shape, hr.shape)
+                #print("sr shape and hr shape:", sr.shape, hr.shape)
                 #sr = torch.cat([sr, sr_map], 1)
                 #hr = torch.cat([hr, hr_map], 1)
+                #sr1, sr2 = torch.split(sr, 3, 1)
+                #hr1, hr2 = torch.split(hr, 3, 1)
                 loss = l['function'](sr, hr)
+                #loss2 = l['function'](sr2, hr2)
+                #loss = loss1 + 0.1*loss2
                 effective_loss = l['weight'] * loss
                 losses.append(effective_loss)
                 self.log[-1, i] += effective_loss.item()

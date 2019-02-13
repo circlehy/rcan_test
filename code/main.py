@@ -9,7 +9,7 @@ from trainer import Trainer
 
 torch.manual_seed(args.seed)
 checkpoint = utility.checkpoint(args)
-
+#print("checkpiont:",checkpoint)
 if checkpoint.ok:
     print(args.pre_train)
     loader = data.Data(args)

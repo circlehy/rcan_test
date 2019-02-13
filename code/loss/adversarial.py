@@ -23,7 +23,7 @@ class Adversarial(nn.Module):
             )
         self.scheduler = utility.make_scheduler(args, self.optimizer)
 
-    def forward(self, fake, freal):
+    def forward(self, fake, real):
         fake_detach = fake.detach()
 
         self.loss = 0

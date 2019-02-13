@@ -27,7 +27,7 @@
 LOG=./../experiment/RCAN_BIX4_satellite_1-`date +%Y-%m-%d-%H-%M-%S`.txt
 #CUDA_VISIBLE_DEVICES=0 python main.py --model RCAN --save RCAN_BIX4_satellite_1 --pre_train ../experiment/RCAN_BIX4_satellite_1/RCAN_BIX4.pt --scale 4 --n_resgroups 10 --n_resblocks 20 --n_feats 64  --reset --chop --save_results --print_model --patch_size 192 --pre_train ../experiment/model/RCAN_BIX2.pt 2>&1 | tee $LOG
 
-CUDA_VISIBLE_DEVICES=0 python main.py --model RCAN --save RCAN_BIX4_satellite_test --pre_train /home/hy/workspace/rcan_test/experiment/model/RCAN_BIX4.pt --scale 4 --n_resgroups 10 --n_resblocks 20 --n_feats 64  --reset --chop --save_results --print_model --patch_size 192 2>&1 | tee $LOG
+CUDA_VISIBLE_DEVICES=0 python main.py --model RCAN --save RCAN_BIX4_satellite_test --scale 4 --n_resgroups 10 --n_resblocks 20 --n_feats 64  --reset --chop --save_results --print_model --patch_size 192 2>&1 | tee $LOG
 
 #CUDA_VISIBLE_DEVICES=0 python main.py --model RCAN --save RCAN_BIX4_satellite_1_3 --pre_train ../experiment/RCAN_BIX4_satellite_1_2/model/model_best.pt --scale 4 --n_resgroups 10 --n_resblocks 20 --n_feats 64  --reset --chop --save_results --print_model --patch_size 192  2>&1 | tee $LOG
 
